@@ -78,3 +78,5 @@ todaysMenu()
       icon_emoji: SLACK_ICON_EMOJI
     });
   });
+
+exports.handler = todaysMenu;
