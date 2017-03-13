@@ -4,63 +4,68 @@ var moment = require("moment");
 var Slack = require("node-slack");
 
 if (process.env.SLACK_URL === undefined)
-    throw new Error("SLACK_URL environment variable is not set.");
+  throw new Error("SLACK_URL environment variable is not set.");
 var slack = new Slack(process.env.SLACK_URL);
 
-var URL = process.env.URL || "https://www.fi.issworld.com/palvelumme-service/ruokailupalvelut/ravintolat/midpoint-ruokalistasivu";
-var DATE_FORMAT = process.env.DATE_FORMAT || "dddd DD.MM."
+var URL = process.env.URL ||
+  "https://www.fi.issworld.com/palvelumme-service/ruokailupalvelut/ravintolat/midpoint-ruokalistasivu";
+var DATE_FORMAT = process.env.DATE_FORMAT || "dddd DD.MM.";
 var SLACK_USERNAME = process.env.SLACK_USERNAME || "Hungry Hungry Hippo";
 var SLACK_ICON_EMOJI = process.env.SLACK_ICON_EMOJI || ":fork_and_knife:";
 
 function getMenu() {
-    return request(URL, {transform: data => {return cheerio.load(data)}}).then(data => {
-        var out = {};
-        var curDate = null;
+  return request(URL, {
+    transform: data => {
+      return cheerio.load(data);
+    }
+  }).then(data => {
+    var out = {};
+    var curDate = null;
 
-        data("table tbody tr td").each((i, el) => {
+    data("table tbody tr td").each((i, el) => {
+      if (el.children.length > 0) {
+        if (el.children[0].data !== undefined) {
+          var data = el.children[0].data;
+          var d = moment(data, DATE_FORMAT);
 
-            if (el.children.length > 0) {
-                if (el.children[0].data !== undefined) {
-                    var data = el.children[0].data;
-
-                    var d = moment(data, DATE_FORMAT);
-                    if (d.isValid()) {
-                        curDate = d;
-                    } else if (curDate !== null) {
-                        formattedDate = curDate.format(DATE_FORMAT);
-                        if (out[formattedDate] === undefined)
-                            out[formattedDate] = [];
-
-                        out[formattedDate].push(data);
-                    }
-                }
-            }
-        });
-        return out;
+          if (d.isValid()) {
+            curDate = d;
+          } else if (curDate !== null) {
+            formattedDate = curDate.format(DATE_FORMAT);
+            if (out[formattedDate] === undefined) out[formattedDate] = [];
+            out[formattedDate].push(data);
+          }
+        }
+      }
     });
+    return out;
+  });
 }
 
 function todaysMenu() {
-    return getMenu()
-        .then(data => {
-            today = data[moment().format(DATE_FORMAT)];
-            if (today === undefined)
-                throw Error("No menu for today!\n\n" + JSON.stringify(data));
-            return today.join("\n");
-        });
+  return getMenu().then(data => {
+    var today = data[moment().format(DATE_FORMAT)];
+
+    if (today === undefined)
+      throw Error("No menu for today!\n\n" + JSON.stringify(data));
+    return today.join("\n");
+  });
 }
 
-
-todaysMenu().then(data => {
+todaysMenu()
+  .then(data => {
     slack.send({
-        text: data,
-        username: SLACK_USERNAME,
-        icon_emoji: SLACK_ICON_EMOJI
+      text: data,
+      username: SLACK_USERNAME,
+      icon_emoji: SLACK_ICON_EMOJI
     });
-}).catch(err => {
+  })
+  .catch(err => {
     slack.send({
-        text: "Something went wrong when getting the menu :cold_sweat:.\n```" + err + "```",
-        username: SLACK_USERNAME,
-        icon_emoji: SLACK_ICON_EMOJI
-    })
-});
+      text: "Something went wrong when getting the menu :cold_sweat:.\n```" +
+        err +
+        "```",
+      username: SLACK_USERNAME,
+      icon_emoji: SLACK_ICON_EMOJI
+    });
+  });
