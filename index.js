@@ -47,7 +47,7 @@ function todaysMenu() {
     var today = data[moment().format(DATE_FORMAT)];
 
     if (today === undefined)
-      throw Error("No menu for today!\n\n" + JSON.stringify(data));
+      throw new Error("No menu for today!\n\n" + JSON.stringify(data));
     return today.join("\n");
   });
 }
