@@ -2,10 +2,15 @@ var request = require("request-promise");
 var cheerio = require("cheerio");
 var moment = require("moment");
 var Slack = require("node-slack");
+
+if (process.env.SLACK_URL === undefined)
+    throw new Error("SLACK_URL environment variable is not set.");
 var slack = new Slack(process.env.SLACK_URL);
 
-var DATE_FORMAT = "dddd DD.MM."
-var URL = "https://www.fi.issworld.com/palvelumme-service/ruokailupalvelut/ravintolat/midpoint-ruokalistasivu";
+var URL = process.env.URL || "https://www.fi.issworld.com/palvelumme-service/ruokailupalvelut/ravintolat/midpoint-ruokalistasivu";
+var DATE_FORMAT = process.env.DATE_FORMAT || "dddd DD.MM."
+var SLACK_USERNAME = process.env.SLACK_USERNAME || "Hungry Hungry Hippo";
+var SLACK_ICON_EMOJI = process.env.SLACK_ICON_EMOJI || ":fork_and_knife:";
 
 function getMenu() {
     return request(URL, {transform: data => {return cheerio.load(data)}}).then(data => {
@@ -45,8 +50,6 @@ function todaysMenu() {
         });
 }
 
-var SLACK_USERNAME = "Hungry Hungry Hippo";
-var SLACK_ICON_EMOJI = ":fork_and_knife:";
 
 todaysMenu().then(data => {
     slack.send({
