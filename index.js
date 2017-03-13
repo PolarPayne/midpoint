@@ -48,14 +48,23 @@ function todaysMenu() {
 
     if (today === undefined)
       throw new Error("No menu for today!\n\n" + JSON.stringify(data));
-    return today.join("\n");
+    return today;
   });
 }
 
 todaysMenu()
   .then(data => {
     slack.send({
-      text: data,
+      text: "Here is today's weather and menu.\nHave a great day! :metal:",
+      attachments: [
+        {
+          fallback: "Weather at Espoo right now.",
+          image_url: "http://wttr.in/Espoo.png?mp0&lang=en"
+        },
+        {
+          text: data.join("\n")
+        }
+      ],
       username: SLACK_USERNAME,
       icon_emoji: SLACK_ICON_EMOJI
     });
