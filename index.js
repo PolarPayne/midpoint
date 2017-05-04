@@ -55,7 +55,7 @@ function todaysMenu() {
 todaysMenu()
   .then(data => {
     slack.send({
-      text: "Here is today's weather and menu.\nHave a great day! :metal:",
+      text: "Here's todays weather and menu.\nHave a great day! :metal:",
       attachments: [
         {
           fallback: "Weather at Espoo right now.",
