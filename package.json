@@ -1,6 +1,6 @@
 {
   "name": "midpoint",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "index.js",
   "author": "Maximilian Remming <maxremming@gmail.com>",
   "license": "MIT",
@@ -12,13 +12,12 @@
     "node": "4.3.2"
   },
   "dependencies": {
-    "cheerio": "^0.22.0",
+    "@slack/client": "^3.10.0",
     "moment": "^2.17.1",
-    "node-slack": "^0.0.7",
     "request": "^2.81.0",
-    "request-promise": "^4.1.1"
+    "request-promise": "^4.2.1"
   },
   "devDependencies": {
-    "prettier": "^0.22.0"
+    "prettier": "^1.5.2"
   }
 }
