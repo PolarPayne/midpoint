@@ -93,19 +93,22 @@ function slackFormat(data) {
   return out;
 }
 
-const slack_url = process.env.SLACK_URL;
-if (slack_url === undefined || slack_url.length === 0)
-  throw new Error("SLACK_URL environment variable is not set.");
+exports.getMenu = todaysMenu;
+exports.slackFormat = slackFormat;
 
-const slack = new IncomingWebhook(slack_url, {
-  username: process.env.SLACK_USERNAME || "Hungry Hungry Hippo",
-  iconEmoji: process.env.SLACK_ICON_EMOJI || ":fork_and_knife:"
-});
+exports.handler = () => {
+  const slack_url = process.env.SLACK_URL;
+  if (slack_url === undefined || slack_url.length === 0)
+    throw new Error("SLACK_URL environment variable is not set.");
 
-todaysMenu().then(slackFormat).then(data =>
-  slack.send(data, err => {
-    if (err) throw Error(err);
-  })
-);
+  const slack = new IncomingWebhook(slack_url, {
+    username: process.env.SLACK_USERNAME || "Hungry Hungry Hippo",
+    iconEmoji: process.env.SLACK_ICON_EMOJI || ":fork_and_knife:"
+  });
 
-exports.handler = todaysMenu;
+  todaysMenu().then(slackFormat).then(data =>
+    slack.send(data, err => {
+      if (err) throw Error(err);
+    })
+  );
+};
